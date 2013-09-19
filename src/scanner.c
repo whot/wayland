@@ -872,6 +872,23 @@ emit_structs(struct wl_list *message_list, struct interface *interface)
 	printf("};\n\n");
 
 	if (!is_interface) {
+	    wl_list_for_each(m, message_list, link) {
+	        printf("#define %s_%s_HANDLER_NONE ((void(*)(",
+		       interface->uppercase_name, m->uppercase_name);
+			printf("void *, "),
+			printf("struct %s *", interface->name);
+		wl_list_for_each(a, &m->arg_list, link) {
+			printf(", ");
+			if (a->type == OBJECT && a->interface_name == NULL)
+				printf("void *");
+			else if (a->type == NEW_ID)
+				printf("struct %s *", a->interface_name);
+			else
+				emit_type(a);
+		}
+		printf(")) NULL)\n");
+	    }
+
 	    printf("static inline int\n"
 		   "%s_add_listener(struct %s *%s,\n"
 		   "%sconst struct %s_listener *listener, void *data)\n"
