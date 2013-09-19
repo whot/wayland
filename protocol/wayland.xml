@@ -1235,7 +1235,7 @@
     </request>
    </interface>
 
-  <interface name="wl_seat" version="3">
+  <interface name="wl_seat" version="4">
     <description summary="group of input devices">
       A seat is a group of keyboards, pointer and touch devices. This
       object is published as a global during start up, or when such a
@@ -1251,6 +1251,7 @@
       <entry name="pointer" value="1" summary="The seat has pointer devices"/>
       <entry name="keyboard" value="2" summary="The seat has one or more keyboards"/>
       <entry name="touch" value="4" summary="The seat has touch devices"/>
+      <entry name="tablets" value="8" summary="The seat has one or more graphics tablet devices" since="4"/>
     </enum>
 
     <event name="capabilities">
@@ -1305,6 +1306,19 @@
       </description>
       <arg name="name" type="string"/>
     </event>
+
+    <!-- Version 4 additions -->
+    <request name="get_tablet_manager" since="4">
+      <description summary="return tablet manager object">
+        The ID provided will be initialized to the wl_tablet_manager
+        interface for this seat. This can then be used to retrieve the
+        objects representing the actual tablet devices.
+
+        This request only takes effect if the seat has the tablets
+        capability.
+      </description>
+      <arg name="id" type="new_id" interface="wl_tablet_manager"/>
+    </request>
 
   </interface>
 
@@ -1615,6 +1629,222 @@
 	this surface may re-use the touch point ID.
       </description>
     </event>
+  </interface>
+
+  <interface name="wl_tablet_manager" version="1">
+    <description summary="controller object for graphic tablet devices">
+      A tablet manager object provides requests to access the graphics
+      tablets available on this system.
+    </description>
+
+    <enum name="tablet_type">
+      <description summary="tablet type">
+        Describes the type of tablet.
+      </description>
+      <entry name="external" value="0" summary="The tablet is an external tablet, such as an Intuos" />
+      <entry name="internal" value="1" summary="The tablet is an built-in tablet, usually in a laptop" />
+      <entry name="display" value ="2" summary="The tablet is a display tablet, such as a Cintiq" />
+    </enum>
+
+    <event name="device_added">
+      <description summary="new device notification"/>
+      <arg name="id" type="new_id" interface="wl_tablet" summary="the newly added graphics tablet " />
+      <arg name="name" type="string" summary="the device name"/>
+      <arg name="vid" type="uint" summary="vendor id"/>
+      <arg name="pid" type="uint" summary="product id"/>
+      <arg name="phys" type="string" />
+      <arg name="uniq" type="string" />
+      <arg name="type" type="uint" />
+    </event>
+
+    <event name="device_removed">
+      <description summary="device removal notification"/>
+        <arg name="id" type="object" interface="wl_tablet" summary="the input_device removed" />
+    </event>
+  </interface>
+
+  <interface name="wl_tablet" version="1">
+    <description summary="a graphics tablet device">
+      This interface describes a graphics tablet, such as Wacom's Intuos or
+      Cintiq ranges.
+
+      Note, this interface does not handle touch input on touch-capable
+      tablets. Depending on the tablet, touch input is sent through the
+      wl_pointer (if used as a touchpad) or wl_touch interface (if used as a
+      touch screen).
+    </description>
+    <enum name="axis_type">
+      <description summary="axis type"/>
+      <entry name="relative" value="2" summary="relative axis"/>
+      <entry name="absolute" value="3" summary="relative axis"/>
+    </enum>
+
+    <request name="describe">
+      <description summary="request axis information">
+        Request axis information from a device. Whe a client sends a
+        wl_tablet.describe request, the compositor will emit a
+        wl_tablet.axis_capability event for each axis on the device.
+        To mark the end of the burst of events, the client can use the
+        wl_display.sync request immediately after calling wl_tablet.describe.
+      </description>
+    </request>
+
+    <request name="release" type="destructor">
+      <description summary="release the wl_tablet object"/>
+    </request>
+
+    <event name="axis_capability">
+      <description summary="axis description">
+        For relative devices, min and max are 0. A resolution, fuzz, or flat of 0
+        denotes an unknown resolution, fuzz, or flat, respectively.
+
+        Note that while the min/max values are announced by the device, the value is
+        not clamped to the actual range by the compositor. A device may send values
+        outside this range.
+      </description>
+      <arg name="type" type="uint" summary="axis type (relative, absolute)" />
+      <arg name="axis" type="uint" summary="axis identifier" />
+      <arg name="min" type="int" summary="minimum axis value, inclusive"/>
+      <arg name="max" type="int" summary="maximum axis value, inclusive"/>
+      <arg name="resolution" type="uint" summary="resolution in units/mm"/>
+      <arg name="fuzz" type="uint"/>
+      <arg name="flat" type="uint"/>
+    </event>
+
+    <event name="button_capability">
+      <description summary="button description">
+      </description>
+      <arg name="buttons" type="array" />
+    </event>
+
+    <enum name="tool_type">
+      <description summary="tool types"/>
+      <entry name="pen" value="0x140" summary="pen tool" />
+      <entry name="eraser" value="0x141" summary="eraser tool" />
+      <entry name="brush" value="0x142" summary="brush tool" />
+      <entry name="pencil" value="0x143" summary="pencil tool" />
+      <entry name="airbrush" value="0x144" summary="airbrush tool" />
+      <entry name="finger" value="0x145" summary="finger tool" />
+      <entry name="mouse" value="0x146" summary="mouse tool" />
+      <entry name="lens" value="0x147" summary="lens tool" />
+    </enum>
+
+    <event name="proximity_in">
+      <description summary="tablet stylus proximity event">
+        This event is sent when a tool comes into proximity of the tablet
+        above the surface.
+
+        If the tablet supports tools with hardware serial numbers, the
+        tool_serial specifies the serial number. Otherwise, the tool_serial
+        number is 0.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="surface_x" type="fixed" summary="x coordinate in surface-relative coordinates" />
+      <arg name="surface_y" type="fixed" summary="y coordinate in surface-relative coordinates" />
+      <arg name="axes" type="array"/>
+      <arg name="tool" type="uint"/>
+      <arg name="tool_serial" type="uint" summary="serial number of the tool, if any"/>
+    </event>
+
+    <event name="proximity_out">
+      <description summary="tablet stylus proximity event">
+        This event is sent when a tool goes out of proximity or out of the
+        surface.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+    </event>
+
+    <enum name="button_state">
+      <description summary="physical button state">
+        Describes the physical state of a button which provoked the button
+	event.
+      </description>
+      <entry name="released" value="0" summary="The button is not pressed"/>
+      <entry name="pressed" value="1" summary="The button is pressed"/>
+    </enum>
+
+    <event name="button">
+      <description summary="stylus button event">
+	Stylus button click and release notifications.
+
+	The location of the click is given by the last motion or
+	proximity event.
+        The time argument is a timestamp with millisecond
+        granularity, with an undefined base.
+      </description>
+
+      <arg name="serial" type="uint"/>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="button" type="uint"/>
+      <arg name="state" type="uint"/>
+    </event>
+
+    <event name="motion">
+      <description summary="tablet stylus motion event"/>
+
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="surface_x" type="fixed" summary="x coordinate in surface-relative coordinates" />
+      <arg name="surface_y" type="fixed" summary="y coordinate in surface-relative coordinates" />
+      <arg name="axes" type="array">
+        <description summary="axis state for other axes">
+          The state of all absolute axes other than x and y, if any. The
+          order of coordinates matches the order of axes as sent by the
+          wl_tablet.axis_capability events. x and y coordinates are not
+          included, the state starts at the third axis.
+        </description>
+      </arg>
+    </event>
+
+    <event name="relative_motion">
+      <description summary="tablet relative motion event">
+        A relative_motion event is sent if a relative axis on a device
+        generates an event.
+
+        This event does not describe motion if the device is in relative
+        mode (i.e. like a touchpad), it only notifies of the relative axes
+        on the device.
+      </description>
+
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="surface_x" type="fixed" summary="x coordinate in surface-relative coordinates" />
+      <arg name="surface_y" type="fixed" summary="y coordinate in surface-relative coordinates" />
+      <arg name="axes" type="array">
+        <description summary="axis state for other axes">
+          The state of all relative axes other than x and y, if any. The
+          order of coordinates matches the order of axes as sent by the
+          wl_tablet.axis_capability events. x and y coordinates are not
+          included, the state starts at the third axis.
+        </description>
+      </arg>
+    </event>
+
+    <request name="bind">
+      <description summary="bind the tablet to a surface">
+        Bind the tablet to the surface. This enables a client to map the
+        area of the tablet 1:1 to the surface area. Only one client can bind
+        to a tablet at a time.
+      </description>
+      <arg name="surface" type="object" interface="wl_surface" />
+    </request>
+
+    <enum name="bind_status">
+      <description summary="notify of bind success"/>
+      <entry name="failed" value="0" />
+      <entry name="success" value="1" />
+    </enum>
+
+    <event name="binding">
+      <description summary="bind notification"/>
+      <arg name="status" type="uint"/>
+    </event>
+
+    <request name="unbind">
+      <description summary="release the wl_tablet object">
+        Unbind the tablet. If the client does not have the tablet bound,
+        this request does nothing.
+      </description>
+    </request>
+
   </interface>
 
   <interface name="wl_output" version="2">
