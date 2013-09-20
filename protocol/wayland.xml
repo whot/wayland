@@ -1737,7 +1737,8 @@
         tool_serial specifies the serial number. Otherwise, the tool_serial
         number is 0.
       </description>
-      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="serial" type="uint"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
       <arg name="surface_x" type="fixed" summary="x coordinate in surface-relative coordinates" />
       <arg name="surface_y" type="fixed" summary="y coordinate in surface-relative coordinates" />
       <arg name="axes" type="array"/>
@@ -1750,7 +1751,8 @@
         This event is sent when a tool goes out of proximity or out of the
         surface.
       </description>
-      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="serial" type="uint"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
     </event>
 
     <enum name="button_state">
