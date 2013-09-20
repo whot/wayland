@@ -1652,8 +1652,6 @@
       <arg name="name" type="string" summary="the device name"/>
       <arg name="vid" type="uint" summary="vendor id"/>
       <arg name="pid" type="uint" summary="product id"/>
-      <arg name="phys" type="string" />
-      <arg name="uniq" type="string" />
       <arg name="type" type="uint" />
     </event>
 
