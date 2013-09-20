@@ -1657,10 +1657,6 @@
       <arg name="type" type="uint" />
     </event>
 
-    <event name="device_removed">
-      <description summary="device removal notification"/>
-        <arg name="id" type="object" interface="wl_tablet" summary="the input_device removed" />
-    </event>
   </interface>
 
   <interface name="wl_tablet" version="1">
@@ -1692,6 +1688,11 @@
     <request name="release" type="destructor">
       <description summary="release the wl_tablet object"/>
     </request>
+
+
+    <event name="removed">
+      <description summary="the device has been removed"/>
+    </event>
 
     <event name="axis_capability">
       <description summary="axis description">
