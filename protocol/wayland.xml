@@ -1819,6 +1819,43 @@
       </arg>
     </event>
 
+    <event name="focus_in">
+      <description summary="tablet button focus event">
+        This event is sent when the focus for the pad buttons is
+        set to a surface.
+      </description>
+      <arg name="serial" type="uint"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
+    </event>
+
+    <event name="focus_out">
+      <description summary="tablet button focus event">
+        This event is sent when the focus for the pad buttons is
+        unset from a surface.
+      </description>
+      <arg name="serial" type="uint"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
+    </event>
+
+    <event name="padbutton">
+      <description summary="pad button event">
+	Pad click and release notifications.
+
+        Pad buttons are those on the physical tablet, not buttons
+        on the stylus. These button events are sent to the focus
+        surface.
+
+        The time argument is a timestamp with millisecond
+        granularity, with an undefined base.
+      </description>
+
+      <arg name="serial" type="uint"/>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="button" type="uint"/>
+      <arg name="state" type="uint"/>
+    </event>
+
+
     <request name="bind">
       <description summary="bind the tablet to a surface">
         Bind the tablet to the surface. This enables a client to map the
