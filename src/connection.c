@@ -915,6 +915,7 @@ wl_closure_invoke(struct wl_closure *closure, uint32_t flags,
 		     count + 2, &ffi_type_void, ffi_types);
 
 	implementation = target->implementation;
+	/* FIXME: crashes if implementation[opcode] is NULL */
 	ffi_call(&cif, implementation[opcode], NULL, ffi_args);
 }
 
