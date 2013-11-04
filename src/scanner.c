@@ -271,6 +271,9 @@ is_nullable_type(struct arg *arg)
 	}
 }
 
+#define require(_ctx, _what) \
+	if (!(_ctx)->_what) fail(_ctx, "Missing parent '"  #_what "' in context");
+
 static void
 start_element(void *data, const char *element_name, const char **atts)
 {
@@ -323,13 +326,15 @@ start_element(void *data, const char *element_name, const char **atts)
 		ctx->protocol->uppercase_name = uppercase_dup(name);
 		ctx->protocol->description = NULL;
 	} else if (strcmp(element_name, "copyright") == 0) {
-		
+		require(ctx, protocol);
 	} else if (strcmp(element_name, "interface") == 0) {
 		if (name == NULL)
 			fail(ctx, "no interface name given");
 
 		if (version == 0)
 			fail(ctx, "no interface version given");
+
+		require(ctx, protocol);
 
 		interface = xmalloc(sizeof *interface);
 		interface->name = xstrdup(name);
@@ -347,6 +352,9 @@ start_element(void *data, const char *element_name, const char **atts)
 		   strcmp(element_name, "event") == 0) {
 		if (name == NULL)
 			fail(ctx, "no request name given");
+
+		require(ctx, protocol);
+		require(ctx, interface);
 
 		message = xmalloc(sizeof *message);
 		message->name = xstrdup(name);
@@ -385,6 +393,10 @@ start_element(void *data, const char *element_name, const char **atts)
 	} else if (strcmp(element_name, "arg") == 0) {
 		if (name == NULL)
 			fail(ctx, "no argument name given");
+
+		require(ctx, protocol);
+		require(ctx, interface);
+		require(ctx, message);
 
 		arg = xmalloc(sizeof *arg);
 		arg->name = xstrdup(name);
@@ -443,6 +455,9 @@ start_element(void *data, const char *element_name, const char **atts)
 		if (name == NULL)
 			fail(ctx, "no enum name given");
 
+		require(ctx, protocol);
+		require(ctx, interface);
+
 		enumeration = xmalloc(sizeof *enumeration);
 		enumeration->name = xstrdup(name);
 		enumeration->uppercase_name = uppercase_dup(name);
@@ -457,6 +472,10 @@ start_element(void *data, const char *element_name, const char **atts)
 		if (name == NULL)
 			fail(ctx, "no entry name given");
 
+		require(ctx, protocol);
+		require(ctx, interface);
+		require(ctx, enumeration);
+
 		entry = xmalloc(sizeof *entry);
 		entry->name = xstrdup(name);
 		entry->uppercase_name = uppercase_dup(name);
@@ -470,6 +489,9 @@ start_element(void *data, const char *element_name, const char **atts)
 	} else if (strcmp(element_name, "description") == 0) {
 		if (summary == NULL)
 			fail(ctx, "description without summary");
+
+		require(ctx, protocol);
+		require(ctx, interface);
 
 		description = xmalloc(sizeof *description);
 		description->summary = xstrdup(summary);
