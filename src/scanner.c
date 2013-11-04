@@ -251,8 +251,22 @@ desc_dump(char *desc, const char *fmt, ...)
 static void
 fail(struct parse_context *ctx, const char *msg)
 {
-	fprintf(stderr, "%s:%ld: %s\n",
+	const char *context;
+	int offset, size;
+
+	fprintf(stderr, "%s:%ld: %s",
 		ctx->filename, XML_GetCurrentLineNumber(ctx->parser), msg);
+
+	context = XML_GetInputContext(ctx->parser, &offset, &size);
+	if (context) {
+		const char *line = &context[offset];
+		const char *endl = index(line, '\n');
+		fprintf(stderr, " near or before: \n%.*s\n",
+				endl ? (int)(endl - line) : size, line);
+	}
+
+	fprintf(stderr, "\n");
+
 	exit(EXIT_FAILURE);
 }
 
