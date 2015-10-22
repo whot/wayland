@@ -1694,6 +1694,7 @@
 	The order of wl_pointer.axis_discrete and wl_pointer.axis_source is
 	not guaranteed.
       </description>
+      <arg name="axis" type="uint"/>
       <arg name="discrete" type="int"/>
     </event>
   </interface>
