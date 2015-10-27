@@ -1579,17 +1579,17 @@
     </request>
 
     <!-- Version 5 additions -->
-    <event name="axis_frame" since="5">
-      <description summary="end of axis set event">
-	Indicates the end of a set of wl_pointer.axis events that logically
-	belong together.
+    <event name="frame" since="5">
+      <description summary="end of a pointer event sequence">
+	Indicates the end of a set of events that logically belong together.
+	A client is expected to accumulate the data in all events events
+	within the frame before proceeding.
 
-	All wl_pointer.axis, wl_pointer.axis_stop, and
-	wl_pointer.axis_source before a wl_pointer.axis_frame event belong
+	All wl_pointer events before a wl_pointer.frame event belong
 	logically together. For example, in a diagonal scroll motion the
 	compositor will send an optional wl_pointer.axis_source event, two
 	wl_pointer.axis events (horizontal and vertical) and finally a
-	wl_pointer.axis_frame event. The client may use this information to
+	wl_pointer.frame event. The client may use this information to
 	calculate a diagonal vector for scrolling.
 
 	When multiple wl_pointer.axis events occur within the same frame,
@@ -1600,12 +1600,10 @@
 	When multiple wl_pointer.axis_stop events occur within in the same
 	frame, this indicates that these axes stopped in the same instance.
 
-	Only one wl_pointer.axis_source event is permitted per axis frame.
-
-	A wl_pointer.axis_frame event is sent for every logical axis event
-	group, even if the group only contains a single wl_pointer.axis or
-	wl_pointer.axis_stop event. In other words, a client may get the
-	sequence: axis, axis_frame, axis, axis_frame, ...
+	A wl_pointer.frame event is sent for every logical event group,
+	even if the group only contains a single wl_pointer event.
+	Specifically, a client may get a sequence: motion, frame, button,
+	frame, axis, frame, axis_stop, frame.
       </description>
     </event>
 
@@ -1634,9 +1632,8 @@
 	Source information for scroll and other axes.
 
 	This event does not occur on its own. It is sent before a
-	wl_pointer.axis_frame event and carries the source information for
-	all events within that frame. A client is expected to accumulate the
-	data in all events events within the frame before proceeding.
+	wl_pointer.frame event and carries the source information for
+	all events within that frame.
 
 	The source specifies how this event was generated. If the source is
 	wl_pointer.axis_source.finger, a wl_pointer.axis_stop event will be
@@ -1648,6 +1645,7 @@
 
 	This event is optional. If the source is unknown for a particular
 	axis event sequence, no event is sent.
+	Only one wl_pointer.axis_source event is permitted per frame.
 
 	The order of wl_pointer.axis_discrete and wl_pointer.axis_source is
 	not guaranteed.
