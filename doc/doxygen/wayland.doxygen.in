@@ -13,4 +13,6 @@ MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 DOT_MULTI_TARGETS      = YES
 ALIASES                += comment{1}="/* \1 *<!-- -->/"
-GENERATE_HTML          = NO
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+EXTRACT_STATIC         = YES
