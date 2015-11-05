@@ -16,3 +16,4 @@ ALIASES                += comment{1}="/* \1 *<!-- -->/"
 OPTIMIZE_OUTPUT_FOR_C  = YES
 EXTRACT_ALL            = YES
 EXTRACT_STATIC         = YES
+WARN_IF_DOC_ERROR      = NO
