@@ -1011,8 +1011,9 @@ format_text_to_comment(const char *text, bool standalone_comment)
 		}
 
 		if (text[i] == '\n' || text[i] == '\0') {
-			printf("%s %.*s\n",
+			printf("%s%s%.*s\n",
 			       i == 0 && standalone_comment ? "/*" : " *",
+			       i == 0 ? "" : " ",
 			       i - start, text + start);
 			bol = 1;
 		}
